@@ -3,27 +3,36 @@ import process from 'process';
 import path from 'path';
 import { spawn } from 'child_process';
 import JSZip from 'jszip';
+import fetch from 'node-fetch';
 
 const files = (await spread(walk('dist')))
 	.filter(x => !x.match(/((\.js\.map)|(\.zip))$/u));
+
 const dist = new JSZip();
-for (const file of files) {
-	const data = await fs.readFile(file);
-	dist.file(file.substring('dist/'.length), data);
-}
+for (const file of files)
+	dist.file(file.substring('dist/'.length), fs.readFile(file));
 
 const buffer = await dist.generateAsync({ type: 'nodebuffer'});
 await fs.writeFile('dist/dist.zip', buffer);
 
 const pkg = JSON.parse(await fs.readFile('package.json'));
-const buildNum = pkg.version;
+const {version, name} = pkg;
+const {channel, username} = pkg.config;
+const target = `${username}/${name}`;
 
+const {latest} = await fetch(`https://itch.io/api/1/x/wharf/latest?target=${target}&channel_name=${channel}`)
+	.then(x => x.json());
+
+if (latest === version)
+	throw 'version number matches remote! increment the package version before pushing';
+
+await ensureButler();
 console.log('process returned ', await run('tools/butler/butler.exe', [
 	'push',
 	'dist/dist.zip',
-	'jacobalbano/bitsyttf:web',
+	`${target}:${channel}`,
 	'--userversion',
-	buildNum,
+	version,
 ]));
 
 /**
@@ -36,6 +45,24 @@ function run(exe, args) {
 	proc.stderr.pipe(process.stderr);
 	proc.stdout.pipe(process.stdout);
 	return new Promise(r => proc.on('exit', code => r(code)));
+}
+
+/**
+ * @returns {Promise<void>}
+ */
+async function ensureButler() {
+	const stat = await fs.stat('tools/butler/butler.exe');
+	if (stat.isFile()) return;
+
+	const url = await fs.readFile('tools/butler/put_butler_here');
+	const resp = await fetch(url);
+	const zip = await JSZip.loadAsync(resp.arrayBuffer());
+
+	await Promise.all(
+		Object.keys(zip.files)
+			.map(name => ({ name, buffer: zip.file(name).async('nodebuffer') }))
+			.map(async ({name, buffer}) => fs.writeFile(`tools/butler/${name}`, await buffer))
+	);
 }
 
 /**

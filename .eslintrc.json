@@ -16,6 +16,7 @@
 		"jsdoc"
 	],
     "rules": {
-		"semi": "error"
+		"semi": "error",
+		"eqeqeq": ["error", "smart"]
     }
 }

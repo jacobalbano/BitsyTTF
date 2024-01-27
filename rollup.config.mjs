@@ -14,7 +14,7 @@ const watch = argv.includes('--watch');
 export default [{
     input: 'src/index.js',
     output: {
-        file: `dist/${pkg.name}${pkg.version}.bundle.js`,
+        file: `dist/${pkg.name}_bundle.js`,
         format: 'iife',
         name: 'app',
         sourcemap: true,

@@ -67,4 +67,17 @@ export function task(startTask) {
 		token = true;
 	}
 }
+/**
+ * Create a navigation lock
+ * @returns {() => void} Release the lock
+ */
+export function createNavigationLock() {
+	const beforeUnloadListener = (event) => {
+		event.preventDefault();
+		return event.returnValue = '';
+	};
+
+	addEventListener('beforeunload', beforeUnloadListener, { capture: true });
+	return () => removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
+}
 

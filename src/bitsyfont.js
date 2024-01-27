@@ -40,7 +40,7 @@ export async function generateBitsyFont(ct, name, { doRestrict, restrictText, fo
 			for (let x = 0; x < fontSize; x++) {
 				const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
 				const lumValue = lum(r, g, b);
-				line.push(Number(lumValue == 0));
+				line.push(Number(lumValue === 0));
 			}
 			
 			const lastOne = line.lastIndexOf(1);

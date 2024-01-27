@@ -9,6 +9,7 @@ import './style/app.css';
 
 import { ids, wireup, classlist, attrs } from './ez';
 import { task } from './async.js';
+import { createNavigationLock } from './async.js';
 
 const {
 	sizeSlider,
@@ -87,7 +88,7 @@ wireup(document, {
 			state.cancel = cancel;
 			saveAs(new Blob([await promise], {type: "text/plain;charset=utf-8"}), `${name}.bitsyfont`);	
 		} catch (error) {
-			if (error != 'cancelled') {
+			if (error !== 'cancelled') {
 				state.error = true;
 				setTimeout(() => state.error = false, 6000);
 			}
@@ -125,17 +126,3 @@ watch('processing', busy => classlist(save, { busy }));
 watch('error', active => classlist(error, { active }));
 watch('maxBlack', value => blackRange.value = blackText.value = value);
 watch('minWhite', value => whiteRange.value = whiteText.value = value);
-
-/**
- * Create a navigation lock
- * @returns {() => void} Release the lock
- */
-function createNavigationLock() {
-	const beforeUnloadListener = (event) => {
-		event.preventDefault();
-		return event.returnValue = '';
-	};
-
-	addEventListener('beforeunload', beforeUnloadListener, { capture: true });
-	return () => removeEventListener('beforeunload', beforeUnloadListener, { capture: true });
-}
