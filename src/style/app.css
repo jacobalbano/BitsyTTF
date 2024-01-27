@@ -1,0 +1,90 @@
+:root {
+	--primary: #6f43c0;
+	--on-primary: #ffffff;
+	--primary-container: #ebddff;
+	--on-primary-container: #250059;
+	--secondary: #635b70;
+	--on-secondary: #ffffff;
+	--secondary-container: #e9def8;
+	--on-secondary-container: #1f182b;
+	--tertiary: #7e525d;
+	--on-tertiary: #ffffff;
+	--tertiary-container: #ffd9e1;
+	--on-tertiary-container: #31101b;
+	--error: #ba1a1a;
+	--on-error: #ffffff;
+	--error-container: #ffdad6;
+	--on-error-container: #410002;
+	--background: #fffbff;
+	--on-background: #1d1b1e;
+	--surface: #fef8fd;
+	--on-surface: #1d1b1e;
+	--surface-variant: #e7e0eb;
+	--on-surface-variant: #49454e;
+	--outline: #7a757f;
+	--outline-variant: #cbc4cf;
+	--shadow: #000000;
+	--scrim: #000000;
+	--inverse-surface: #323033;
+	--inverse-on-surface: #f5eff4;
+	--inverse-primary: #d3bbff;
+	--surface-dim: #ded8dd;
+	--surface-bright: #fef8fd;
+	--surface-container-lowest: #ffffff;
+	--surface-container-low: #f8f2f7;
+	--surface-container: #f2ecf1;
+	--surface-container-high: #ece6eb;
+	--surface-container-highest: #e6e1e6;
+}
+
+.micro {
+	width: 4.5em !important;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	display: none;
+	margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+.fab {
+	z-index: 100;
+}
+
+.hidden {
+	display: none;
+}
+
+.drag-active {
+	border: 2px darkgrey dashed;
+}
+
+#preview {
+	overflow: hidden;
+}
+
+.busy .not-busy,
+:not(.busy) .when-busy {
+	display: none;
+}
+
+.busy .when-busy {
+	display: unset;
+}
+
+details:not([open]) .details-open,
+details[open] .details-closed {
+	display: none;
+}
+
+details:not([open]) .details-closed,
+details[open] .details-open {
+	display: unset;
+}

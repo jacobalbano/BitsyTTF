@@ -1,0 +1,163 @@
+<html>
+
+<head>
+	<link href="style/bundle.css" rel="stylesheet">
+	<title>BitsyTTF</title>
+	<meta charset="utf-8">
+</head>
+
+<body on:load="ui()">
+	<main class="responsive surface-container-lowest">
+		<h3 class="center-align">BitsyTTF</h3>
+		<p class="center-align">Generate .bitsyfont files from TTF, OTF, and WOFF files</p>
+		<div class="grid">
+			<div class="s12 m12 l6">
+				<h6 class="left-padding bottom-padding">
+					<span id="fontName">No font uploaded</span>
+					&nbsp;
+					<a class="link hidden" id="unload" on:click="state.fontFile = null">(unload)</a>
+				</h6>
+				<div id="dropzone" class="fill small-height middle-align center-align"
+					on:dragover.stop.prevent="drag.over($e)"
+					on:dragenter="drag.enter($e)"
+					on:dragleave="drag.leave($e)"
+					on:drop.stop.prevent="drag.drop($e)"
+				>
+					<div class="center-align">
+						<h6 class="center-align">Drop a font file here</h6>
+						<div class="space"></div>
+						<div>or</div>
+						<nav class="center-align">
+							<div class="field label prefix border">
+								<button class="border small-round">
+									<i>folder_open</i>
+									<input class="button" type="file" accept=".ttf,.otf,.woff"
+										on:change="state.fontFile = this.files[0]">
+									<label>Browse for a file</label>
+								</button>
+							</div>
+						</nav>
+					</div>
+				</div>
+				<div id="preview" class="hidden border white small-height">
+					<canvas id="previewCanvas"></canvas>
+					<nav class="vertical">
+						<i>add</i>
+						<label class="slider vertical">
+						  <input type="range" min="0" max="100">
+						  <span></span>
+						</label>
+						<i>remove</i>
+					  </nav>
+				</div>
+				<h6 class="left-padding">Preview text</h6>
+				<div class="field textarea border extra">
+					<textarea id="sampleText"
+						initial:value="state.sampleText"
+						on:input="state.sampleText = this.value"
+					></textarea>
+					<span class="helper"></span>
+				</div>
+			</div>
+			<div class="s12 m12 l6">
+				<div class="left-padding">
+					<h6>Size</h6>
+					<span class="helper">Set the size of the resulting font</span>
+				</div>
+				<div class="field middle-align">
+					<nav>
+						<label class="slider">
+							<input id="sizeSlider" type="range" min="9" max="24"
+								on:input="state.fontSize = Number(this.value); ui(this)"
+								initial:value="state.fontSize"
+								on:mouseup.blur>
+							<span></span>
+						</label>
+						<div class="field small micro">
+							<input type="number" id="sizeText"
+								initial:value="state.fontSize"
+								on:change="state.fontSize = clamp(this.value, sizeSlider); ui(this)">
+						</div>
+					</nav>
+				</div>
+				
+				<div class="left-padding">
+					<h6>Threshold</h6>
+					<span class="helper">Adjust the black/white threshold to reduce aliasing</span>
+				</div>
+				<div class="field middle-align">
+					<nav>
+						<div class="field small micro">
+							<input type="number" id="blackText"
+								initial:value="state.maxBlack"
+								on:change="state.maxBlack = clampBlack(this.value); ui(this)"
+							>
+							<span class="helper">Black</span>
+						</div>
+						<label class="slider">
+							<input id="blackRange" type="range" min="0" max="254"
+								initial:value="state.maxBlack"
+								on:input="state.maxBlack = clampBlack(this.value); ui(this)"
+								on:click.blur
+							>
+							<input id="whiteRange" type="range" min="0" max="254"
+								initial:value="state.minWhite"
+								on:input="state.minWhite = clampWhite(this.value); ui(this)"
+								on:click.blur
+							>
+							<span></span>
+						</label>
+						<div class="field small micro">
+							<input type="number" id="whiteText"
+								initial:value="state.minWhite"
+								on:change="state.minWhite = clampWhite(this.value); ui(this)"
+							>
+							<span class="helper">White</span>
+						</div>
+					</nav>
+				</div>
+				<div class="medium-space"></div>
+				<details on:toggle="state.doRestrict = this.open">
+					<summary class="none">
+						<div class="left-padding">
+							<nav>
+								<h6>Restrict font glyphs</h6>
+								<i class="details-open">expand_less</i>
+								<i class="details-closed">expand_more</i>
+							</nav>
+							<span class="helper">Leave this closed to include every character in the output</span>
+						</div>
+					</summary>
+					
+					<div class="field textarea border extra">
+						<textarea id="restrictText"
+							initial:value="state.restrictText"
+							on:input="state.restrictText = this.value"
+						></textarea>
+						<span class="helper">Type characters to include in the font</span>
+					</div>
+				</details>
+			</div>
+		</div>
+		<div class="large-space"></div>
+	</main>
+	<div class="fab fixed bottom right margin">
+		<div class="max"></div>
+		<button id="save" class="left-round top-round extra primary medium-elevate"
+			disabled on:click.blur="onSave(state)"
+		>
+			<span class="not-busy row">
+				<i>save</i>
+				<span>Save</span>
+			</span>
+			<span class="when-busy row">
+				<span>Cancel</span>
+				<progress class="circle small primary when-busy"></progress>
+			</span>
+		</button>
+	</div>
+
+	<div id="error" class="snackbar error">An error occurred while processing</div>
+</body>
+
+</html>

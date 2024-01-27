@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "watch",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: watch",
+			"detail": "npx rollup --config rollup.config.mjs --watch"
+		},
+		{
+			"type": "npm",
+			"script": "package",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: package",
+			"detail": "node tools/pack/pack.mjs"
+		},
+		
+	]
+}
