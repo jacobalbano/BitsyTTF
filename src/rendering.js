@@ -26,46 +26,40 @@ export function redrawPreview({ font, sampleText, fontSize, minWhite, maxBlack }
 	
 	if (font == null) return;
 	const context = previewCanvas.getContext('2d');
+	context.translate(2, 2);
 	const scale = 4;
 	context.scale(scale, scale);
 
 	for (const line of sampleText.split('\n')) {
 		if (line) {
-			const baseline = ((font.ascender / font.unitsPerEm) + (font.descender / font.unitsPerEm)) * fontSize;
-			const offscreen = renderWithThreshold(line, font, fontSize, baseline, maxBlack, minWhite );
-			context.drawImage(offscreen, 0, 2, offscreen.width, offscreen.height);
+			let cursor = 0;
+			for (const char of line) {
+				const charBmp = renderChar(char, font, fontSize, maxBlack, minWhite);
+				context.drawImage(charBmp, cursor, 0);
+				cursor += charBmp.width;
+			}
 		}
 		context.translate(0, fontSize);
 	}
 }
-/**
- * @param {string} string String to render
- * @param {Font} font Font to render with
- * @param {number} fontSize Font size
- * @returns {number} baseline
- */
-export function getBaseline(string, font, fontSize) {
-	const path = font.getPath(string, 0, 0, fontSize, fontOptions);
-	const bbox = path.getBoundingBox();
-	return fontSize - bbox.y2;
-}
 
 /**
  * 
- * @param {string} string String to render
+ * @param {string} char String to render
  * @param {Font} font Font to render with
  * @param {number} fontSize Font size
- * @param {number} baseline Baseline to render at (since individual glyphs have their own values)
  * @param {number} black Anything under this number is clamped to black
  * @param {number} white Anything above this number is clamped to white
  * @returns {HTMLCanvasElement} Canvas
  */
-export function renderWithThreshold(string, font, fontSize, baseline, black, white) {
-	const path = font.getPath(string, 0, baseline, fontSize, fontOptions);
+export function renderChar(char, font, fontSize, black, white) {
+	const descender = (font.descender / font.unitsPerEm) * fontSize;
+	const bottom = fontSize + descender + 1;
+	const path = font.getPath(char, 0, bottom, fontSize, fontOptions);
 	const offscreen = document.createElement('canvas');
-	offscreen.width = Math.max(font.getAdvanceWidth(string, fontSize) + fontSize, fontSize);
-	offscreen.height = fontSize;
-	const offscreenCtx = offscreen.getContext('2d');
+	offscreen.width = Math.max(font.getAdvanceWidth(char, fontSize), fontSize);
+	offscreen.height = fontSize + 2;
+	const offscreenCtx = offscreen.getContext('2d', { willReadFrequently: true });
 	offscreenCtx.imageSmoothingEnabled = false;
 	offscreenCtx.fillStyle = 'white';
 	offscreenCtx.fillRect(0, 0, offscreen.width, offscreen.height);

@@ -23,7 +23,7 @@
 					on:dragleave="drag.leave($e)"
 					on:drop.stop.prevent="drag.drop($e)"
 				>
-					<div class="center-align">
+					<div id="fontEmpty" class="center-align">
 						<h6 class="center-align">Drop a font file here</h6>
 						<div class="space"></div>
 						<div>or</div>
@@ -38,17 +38,17 @@
 							</div>
 						</nav>
 					</div>
-				</div>
-				<div id="preview" class="hidden border white small-height">
-					<canvas id="previewCanvas"></canvas>
-					<nav class="vertical">
-						<i>add</i>
-						<label class="slider vertical">
-						  <input type="range" min="0" max="100">
-						  <span></span>
-						</label>
-						<i>remove</i>
-					  </nav>
+					<div id="preview" class="hidden border white small-height">
+						<canvas id="previewCanvas"></canvas>
+						<nav class="vertical">
+							<i>add</i>
+							<label class="slider vertical">
+							  <input type="range" min="0" max="100">
+							  <span></span>
+							</label>
+							<i>remove</i>
+						  </nav>
+					</div>
 				</div>
 				<h6 class="left-padding">Preview text</h6>
 				<div class="field textarea border extra">
@@ -62,7 +62,7 @@
 			<div class="s12 m12 l6">
 				<div class="left-padding">
 					<h6>Size</h6>
-					<span class="helper">Set the size of the resulting font</span>
+					<span class="helper">May not correspond exactly to output dimensions</span>
 				</div>
 				<div class="field middle-align">
 					<nav>
@@ -83,7 +83,7 @@
 				
 				<div class="left-padding">
 					<h6>Threshold</h6>
-					<span class="helper">Adjust the black/white threshold to reduce aliasing</span>
+					<span class="helper">Only completely black pixels will be included in the font</span>
 				</div>
 				<div class="field middle-align">
 					<nav>

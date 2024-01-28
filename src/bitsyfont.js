@@ -1,6 +1,6 @@
 import { Font } from "opentype.js";
 import { longRunningLoop } from "./async";
-import { renderWithThreshold, lum, getBaseline } from "./rendering";
+import { renderChar, lum } from "./rendering";
 
 /**
  * @async
@@ -16,51 +16,58 @@ import { renderWithThreshold, lum, getBaseline } from "./rendering";
  * @returns {string} The constructed bitsyfont
  */
 export async function generateBitsyFont(ct, name, { doRestrict, restrictText, font, fontSize, minWhite, maxBlack}) {
-	const sections = [];
 	const codepoints = () => doRestrict
 		? [...new Set(restrictText)].map(x => x.codePointAt(0))
 		: yieldGlyphCodePoints(font);
 
-	let commonBaseline = fontSize;
-	await longRunningLoop(codepoints(), cp => {
-		const char = String.fromCodePoint(cp);
-		commonBaseline = Math.min(commonBaseline, getBaseline(char, font, fontSize));
-	});
 
 	let width = 0, height = 0;
+	const glyphs = [];
 	await longRunningLoop(codepoints(), cp => {
-		sections.push(`CHAR ${cp}`);
 
 		const char = String.fromCodePoint(cp);
-		const canvas = renderWithThreshold(char, font, fontSize, commonBaseline, minWhite, maxBlack);
-		const ctx = canvas.getContext('2d');
+		const canvas = renderChar(char, font, fontSize, minWhite, maxBlack);
+		const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-		for (let y = 0; y < fontSize; y++) {
+		const glyph = {cp, lines: []};
+		glyphs.push(glyph);
+
+		for (let y = 0; y < canvas.height; y++) {
 			const line = [];
-			for (let x = 0; x < fontSize; x++) {
+			glyph.lines.push(line);
+
+			for (let x = 0; x < canvas.width; x++) {
 				const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
 				const lumValue = lum(r, g, b);
 				line.push(Number(lumValue === 0));
 			}
 			
-			const lastOne = line.lastIndexOf(1);
-			width = Math.max(width, lastOne);
+			const lastOne = line.lastIndexOf(1) ;
+			width = Math.max(width, lastOne + 1);
 			if (lastOne >= 0)
-				height = Math.max(height, y);
-
-			sections.push(line.join('')
-				// .replaceAll('1', '█')
-				// .replaceAll('0', '░')
-			);
+				height = Math.max(height, y + 1);
 		}
 
 		ct.throwIfCancelled();
 	});
 
-	sections.splice(0, 0, 
+	const sections = [
 		`FONT ${name}`,
-		`SIZE ${Math.min(width + 1, fontSize)} ${Math.min(height + 1, fontSize)}`
-	);
+		`SIZE ${width} ${height}`
+	];
+
+	for (const {cp, lines} of glyphs) {
+		sections.push(`CHAR ${cp}`);
+		for (let row = 0; row < height; row++) {
+			const line = lines[row];
+			line.length = width;
+			sections.push(line.join('')
+				// .replaceAll('1', '█')
+				// .replaceAll('0', '░')
+			);
+		}
+	}
+
 	return sections.join('\n');
 }
 

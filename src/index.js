@@ -19,6 +19,7 @@ const {
 	sampleText,
 	fontName,
 	dropzone,
+	fontEmpty,
 	preview,
 	previewCanvas,
 	unload,
@@ -103,12 +104,14 @@ window.addEventListener('resize', () => redrawPreview(state, preview, previewCan
 
 watch('fontFile', async file => {
 	classlist([unload, preview], { hidden: file == null });
-	classlist(dropzone, { hidden: file != null });
+	classlist(fontEmpty, { hidden: file != null });
 	attrs(save, { disabled: file == null });
 	clear(previewCanvas);
 	
-	if (file == null)
+	if (file == null) {
+		fontName.innerText = 'No font uploaded';
 		return;
+	}
 
 	fontName.innerText = file.name;
 	state.font = parse(await file.arrayBuffer());

@@ -24,11 +24,8 @@ export default [{
             template: 'src/index.html',
             target: 'index.html'
         }),
-		watchExtra(['src/index.html']),
 		nodeResolve(),
 		commonjs(),
-		...when(minify, [terser()]),
-		...when(watch, [serve('dist')]),
 		css({ output: 'style/bundle.css', minify }),
         copy({
             targets: [{
@@ -36,6 +33,11 @@ export default [{
                 dest: 'dist/style/',
             }],
         }),
+		...when(minify, [terser()]),
+		...when(watch, [
+			serve('dist'),
+			watchExtra(['src/index.html']),
+		]),
     ],
 }];
 
